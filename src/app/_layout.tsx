@@ -14,6 +14,7 @@ import { PaperProvider } from 'react-native-paper';
 import { APIProvider } from '@/api';
 import { hydrateAuth, loadSelectedTheme } from '@/core';
 import { SQLiteProvider } from '@/core/sqlite';
+import { ReduxProvider } from '@/core/state/redux-provider';
 import { useThemeConfig } from '@/core/use-theme-config';
 
 export { ErrorBoundary } from 'expo-router';
@@ -47,18 +48,20 @@ function Providers({ children }: { children: React.ReactNode }) {
       className={theme.dark ? `dark` : undefined}
     >
       <KeyboardProvider>
-        <ThemeProvider value={theme}>
-          <PaperProvider>
-            <APIProvider>
-              <SQLiteProvider>
-                <BottomSheetModalProvider>
-                  {children}
-                  <FlashMessage position="top" />
-                </BottomSheetModalProvider>
-              </SQLiteProvider>
-            </APIProvider>
-          </PaperProvider>
-        </ThemeProvider>
+        <ReduxProvider>
+          <ThemeProvider value={theme}>
+            <PaperProvider>
+              <APIProvider>
+                <SQLiteProvider>
+                  <BottomSheetModalProvider>
+                    {children}
+                    <FlashMessage position="top" />
+                  </BottomSheetModalProvider>
+                </SQLiteProvider>
+              </APIProvider>
+            </PaperProvider>
+          </ThemeProvider>
+        </ReduxProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>
   );
