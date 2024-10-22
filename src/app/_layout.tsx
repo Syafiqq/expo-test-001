@@ -9,6 +9,7 @@ import { StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { PaperProvider } from 'react-native-paper';
 
 import { APIProvider } from '@/api';
 import { hydrateAuth, loadSelectedTheme } from '@/core';
@@ -47,14 +48,16 @@ function Providers({ children }: { children: React.ReactNode }) {
     >
       <KeyboardProvider>
         <ThemeProvider value={theme}>
-          <APIProvider>
-            <SQLiteProvider>
-              <BottomSheetModalProvider>
-                {children}
-                <FlashMessage position="top" />
-              </BottomSheetModalProvider>
-            </SQLiteProvider>
-          </APIProvider>
+          <PaperProvider>
+            <APIProvider>
+              <SQLiteProvider>
+                <BottomSheetModalProvider>
+                  {children}
+                  <FlashMessage position="top" />
+                </BottomSheetModalProvider>
+              </SQLiteProvider>
+            </APIProvider>
+          </PaperProvider>
         </ThemeProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>
