@@ -4,11 +4,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { useAuth, useIsFirstTime } from '@/core';
 import { Pressable, Text } from '@/ui';
-import {
-  Feed as FeedIcon,
-  Settings as SettingsIcon,
-  Style as StyleIcon,
-} from '@/ui/icons';
+import { Feed as FeedIcon, Rate, Settings as SettingsIcon, Style as StyleIcon } from '@/ui/icons';
 
 export default function TabLayout() {
   const status = useAuth.use.status();
@@ -58,6 +54,15 @@ export default function TabLayout() {
           headerShown: false,
           tabBarIcon: ({ color }) => <SettingsIcon color={color} />,
           tabBarTestID: 'settings-tab',
+        }}
+      />
+      <Tabs.Screen
+        name="menu-4"
+        options={{
+          title: 'ToDo',
+          headerShown: true,
+          tabBarIcon: ({ color }) => <Rate color={color} />,
+          tabBarTestID: 'todo-tab',
         }}
       />
     </Tabs>
