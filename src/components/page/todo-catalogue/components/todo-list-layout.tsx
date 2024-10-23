@@ -2,6 +2,7 @@ import { FlashList } from '@shopify/flash-list';
 import React from 'react';
 import { View } from 'react-native';
 
+import { useTodoRepository } from '@/api/repositoiry/todo';
 import { TodoCard } from '@/components/page/todo-catalogue/components/todo-card';
 import type { TodoPresenter } from '@/components/page/todo-catalogue/todo-presenter';
 import { EmptyList, FocusAwareStatusBar } from '@/ui';
@@ -11,9 +12,10 @@ interface Props {
 }
 
 export function ListPage({ data }: Props) {
+  const repo = useTodoRepository();
   const renderItem = React.useCallback(
-    ({ item }: { item: TodoPresenter }) => <TodoCard {...item} />,
-    [],
+    ({ item }: { item: TodoPresenter }) => <TodoCard repository={repo} {...item} />,
+    [repo],
   );
 
   return (
