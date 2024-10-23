@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useFocusEffect } from 'expo-router';
 import React, { useEffect } from 'react';
 
 import { useTodoRepository } from '@/api/repositoiry/todo';
@@ -14,12 +15,23 @@ export function TodoCatalogue() {
     isPending,
     error,
     data: todos,
+    refetch,
   } = useQuery({
     queryKey: ['todos'],
     queryFn: () => repository.getAllFromLocal(),
     select: (data) => data.map(toPresenter),
-    enabled: !!repository,
+    enabled: false,
   });
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const timeoutId = setTimeout(() => {
+        refetch();
+      }, 2000);
+
+      return () => clearTimeout(timeoutId);
+    }, [refetch]),
+  );
 
   useEffect(() => {
     if (error) {
