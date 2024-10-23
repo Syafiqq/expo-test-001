@@ -1,31 +1,48 @@
 import { FontAwesome } from '@expo/vector-icons';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View } from 'react-native';
-import { useDispatch } from 'react-redux';
 
-import { useTodoRepository } from '@/api/repositoiry/todo';
+import { type ToDoRepository } from '@/api/repositoiry/todo/todo-repository.types';
 import type { TodoPresenter } from '@/components/page/todo-catalogue/todo-presenter';
-import { deleteItem } from '@/core/state/todo-catalogue-slice';
+import type { TodoEntity } from '@/core/entity/todo-entity.types';
 import { Pressable, showErrorMessage, Text } from '@/ui';
+
+interface ItemProps extends TodoPresenter {
+  repository: ToDoRepository;
+}
 
 export const TodoCard = ({
   title,
   description,
   id,
   dueDate,
-}: TodoPresenter) => {
-  const repo = useTodoRepository();
-  const dispatch = useDispatch();
+  repository,
+}: ItemProps) => {
+  const queryClient = useQueryClient();
+
+  const { isError, error, mutate } = useMutation({
+    mutationFn: (id: string) => repository.deleteFromLocal(id),
+  });
 
   const handleDelete = async () => {
-    try {
-      await repo.deleteFromLocal(id);
-      dispatch(deleteItem(id));
-    } catch (error) {
-      showErrorMessage('Error delete todo list');
-    }
+    mutate(id, {
+      onSettled: (_, error) => {
+        if (!error) {
+          queryClient.setQueryData(['todos'], function (old: TodoEntity[]) {
+            return old.filter((item) => item.id !== id);
+          });
+        }
+      },
+    });
   };
+
+  useEffect(() => {
+    if (isError) {
+      showErrorMessage(`Error delete post ${error.message}`);
+    }
+  }, [error, isError]);
 
   return (
     <Link push href={`/todo/${id}`} asChild>

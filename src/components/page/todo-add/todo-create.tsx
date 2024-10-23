@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as React from 'react';
 import { useEffect } from 'react';
@@ -6,9 +7,10 @@ import { useForm } from 'react-hook-form';
 import { showMessage } from 'react-native-flash-message';
 import { z } from 'zod';
 
+import { useTodoRepository } from '@/api/repositoiry/todo';
 import { type TodoCreatePresenter } from '@/components/page/todo-add/todo-create-presenter';
-import { useTodoCreateViewModel } from '@/components/page/todo-add/use-todo-create-view-model';
-import { useAppSelector } from '@/core/state/use-redux';
+import { toDomain } from '@/components/page/todo-add/todo-create-presenter+entity';
+import { type TodoEntity } from '@/core/entity/todo-entity.types';
 import { Button, ControlledInput, showErrorMessage, View } from '@/ui';
 
 const schema = z.object({
@@ -19,34 +21,42 @@ const schema = z.object({
 type FormType = z.infer<typeof schema>;
 
 export default function TodoCreate() {
-  const { control, handleSubmit } = useForm<FormType>({
+  const { control, handleSubmit, reset } = useForm<FormType>({
     resolver: zodResolver(schema),
   });
-  const status = useAppSelector((state) => state.todoCreate.status);
 
-  const viewModel = useTodoCreateViewModel();
+  const queryClient = useQueryClient();
+  const repository = useTodoRepository();
+
+  const { isPending, isSuccess, isError, mutate } = useMutation({
+    mutationFn: (data: TodoEntity) => repository.addToLocal(data),
+  });
 
   const onSubmit = (data: TodoCreatePresenter) => {
-    viewModel.createTodo(data);
+    mutate(toDomain(data), {
+      onSettled: (data) => {
+        if (data) {
+          reset();
+          queryClient.invalidateQueries({ queryKey: ['todos'] });
+        }
+      },
+    });
   };
 
   useEffect(() => {
-    switch (status) {
-      case 'failed':
-        viewModel.acknowledgeCrate();
-        showErrorMessage('Error adding todo list');
-        break;
-      case 'success':
-        viewModel.acknowledgeCrate();
-        showMessage({
-          message: 'Post added successfully',
-          type: 'success',
-        });
-        break;
-      default:
-        break;
+    if (isSuccess) {
+      showMessage({
+        message: 'Post added successfully',
+        type: 'success',
+      });
     }
-  }, [status, viewModel]);
+  }, [isSuccess]);
+
+  useEffect(() => {
+    if (isError) {
+      showErrorMessage('Error adding todo list');
+    }
+  }, [isError]);
 
   return (
     <>
@@ -71,7 +81,7 @@ export default function TodoCreate() {
         />
         <Button
           label="Add Post"
-          loading={status === 'loading'}
+          loading={isPending}
           onPress={handleSubmit(onSubmit)}
           testID="add-post-button"
         />
