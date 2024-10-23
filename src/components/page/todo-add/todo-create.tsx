@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as React from 'react';
 import { useEffect } from 'react';
@@ -25,6 +25,7 @@ export default function TodoCreate() {
     resolver: zodResolver(schema),
   });
 
+  const queryClient = useQueryClient();
   const repository = useTodoRepository();
 
   const { isPending, isSuccess, isError, mutate } = useMutation({
@@ -36,6 +37,7 @@ export default function TodoCreate() {
       onSettled: (data) => {
         if (data) {
           reset();
+          queryClient.invalidateQueries({ queryKey: ['todos'] });
         }
       },
     });
