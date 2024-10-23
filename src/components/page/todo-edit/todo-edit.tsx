@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRenderInfo } from '@uidotdev/usehooks';
 import { Stack } from 'expo-router';
 import * as React from 'react';
@@ -30,6 +30,7 @@ export default function TodoEdit({ id }: Props) {
     resolver: zodResolver(schema),
   });
 
+  const queryClient = useQueryClient();
   const todo = useRef<TodoEntity | null>(null);
   const repository = useTodoRepository();
 
@@ -65,7 +66,22 @@ export default function TodoEdit({ id }: Props) {
       title: data.title,
       description: data.description,
     };
-    mutate(updatedTodo);
+    mutate(updatedTodo, {
+      onSettled: (data) => {
+        if (data) {
+          queryClient.setQueryData(['todo', id], data);
+
+          queryClient.setQueryData(['todos'], function (old: TodoEntity[]) {
+            return old.map((item) => {
+              if (item.id === data.id) {
+                return data;
+              }
+              return item;
+            });
+          });
+        }
+      },
+    });
   };
 
   useEffect(() => {
