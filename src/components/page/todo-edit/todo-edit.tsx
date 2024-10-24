@@ -1,20 +1,42 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRenderInfo } from '@uidotdev/usehooks';
+import { format } from 'date-fns';
 import { Stack } from 'expo-router';
 import * as React from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Pressable } from 'react-native';
+import DatePicker from 'react-native-date-picker';
 import { showMessage } from 'react-native-flash-message';
 import { z } from 'zod';
 
 import { useTodoRepository } from '@/api/repositoiry/todo';
 import { type TodoEntity } from '@/core/entity/todo-entity.types';
-import { Button, ControlledInput, showErrorMessage, View } from '@/ui';
+import { nullableToNull, nullableToUndefined } from '@/core/type-utils';
+import {
+  Button,
+  ControlledCheckbox,
+  ControlledInput,
+  ControlledSelect,
+  type OptionType,
+  showErrorMessage,
+  View,
+} from '@/ui';
+
+const priorities: OptionType[] = [
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' },
+];
 
 const schema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
+  dueDate: z.coerce.date(),
+  dueDateDisplay: z.string(),
+  completed: z.boolean().default(false),
+  priority: z.enum(['low', 'medium', 'high']).default('low'),
 });
 
 type FormType = z.infer<typeof schema>;
@@ -26,13 +48,16 @@ type Props = {
 // eslint-disable-next-line max-lines-per-function
 export default function TodoEdit({ id }: Props) {
   useRenderInfo('TodoEdit');
-  const { control, handleSubmit, reset } = useForm<FormType>({
+  const { control, handleSubmit, reset, setValue } = useForm<FormType>({
     resolver: zodResolver(schema),
   });
 
   const queryClient = useQueryClient();
   const todo = useRef<TodoEntity | null>(null);
   const repository = useTodoRepository();
+
+  const [date, setDate] = useState(new Date());
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const {
     isPending: isFetchPending,
@@ -65,6 +90,9 @@ export default function TodoEdit({ id }: Props) {
       ...currentTodo,
       title: data.title,
       description: data.description,
+      dueDate: data.dueDate,
+      completed: data.completed,
+      priority: nullableToNull(data.priority),
     };
     mutate(updatedTodo, {
       onSettled: (data) => {
@@ -93,9 +121,21 @@ export default function TodoEdit({ id }: Props) {
   useEffect(() => {
     if (isFetchSuccess && fetchData) {
       todo.current = fetchData;
+
+      let dueDate = fetchData.dueDate;
+      let dueDateDisplay: string;
+      if (dueDate) {
+        dueDateDisplay = format(dueDate, 'd MMM yyyy h:mm a');
+      } else {
+        dueDateDisplay = '';
+      }
       reset({
         title: fetchData.title,
         description: fetchData.description ?? undefined,
+        dueDate: dueDate ?? undefined,
+        dueDateDisplay: dueDateDisplay,
+        completed: fetchData.completed,
+        priority: nullableToUndefined(fetchData.priority),
       });
     }
   }, [fetchData, isFetchSuccess, reset]);
@@ -117,6 +157,20 @@ export default function TodoEdit({ id }: Props) {
 
   return (
     <>
+      <DatePicker
+        modal
+        open={datePickerOpen}
+        date={date}
+        onConfirm={(date) => {
+          setDatePickerOpen(false);
+          setDate(date);
+          setValue('dueDateDisplay', format(date, 'd MMM yyyy h:mm a'));
+          setValue('dueDate', date);
+        }}
+        onCancel={() => {
+          setDatePickerOpen(false);
+        }}
+      />
       <Stack.Screen
         options={{
           title: 'Add Todo',
@@ -137,6 +191,33 @@ export default function TodoEdit({ id }: Props) {
           multiline
           testID="body-input"
           editable={!isFetchPending && !isUpdatePending}
+        />
+        <Pressable onPress={() => setDatePickerOpen(true)}>
+          <ControlledInput
+            name="dueDateDisplay"
+            label="Due Date"
+            control={control}
+            testID="input-due-date"
+            editable={false}
+            textAlwaysActive={true}
+          />
+        </Pressable>
+        <View className="mb-2 mt-4">
+          <ControlledSelect
+            name="priority"
+            label="Priority"
+            control={control}
+            options={priorities}
+            testID="input-select"
+          />
+        </View>
+        <ControlledCheckbox
+          className="my-2"
+          name="completed"
+          control={control}
+          accessibilityLabel="Mark as completed"
+          label="Mark as completed"
+          testID="input-completed"
         />
         <Button
           label="Edit Post"
