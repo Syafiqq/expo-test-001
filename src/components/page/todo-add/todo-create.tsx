@@ -1,9 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { format } from 'date-fns';
 import { Stack } from 'expo-router';
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Pressable } from 'react-native';
+import DatePicker from 'react-native-date-picker';
 import { showMessage } from 'react-native-flash-message';
 import { z } from 'zod';
 
@@ -16,17 +19,23 @@ import { Button, ControlledInput, showErrorMessage, View } from '@/ui';
 const schema = z.object({
   title: z.string().min(10),
   description: z.string().min(120),
+  dueDate: z.coerce.date(),
+  dueDateDisplay: z.string(),
 });
 
 type FormType = z.infer<typeof schema>;
 
+// eslint-disable-next-line max-lines-per-function
 export default function TodoCreate() {
-  const { control, handleSubmit, reset } = useForm<FormType>({
+  const { control, handleSubmit, reset, setValue } = useForm<FormType>({
     resolver: zodResolver(schema),
   });
 
   const queryClient = useQueryClient();
   const repository = useTodoRepository();
+
+  const [date, setDate] = useState(new Date());
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const { isPending, isSuccess, isError, mutate } = useMutation({
     mutationFn: (data: TodoEntity) => repository.addToLocal(data),
@@ -60,6 +69,20 @@ export default function TodoCreate() {
 
   return (
     <>
+      <DatePicker
+        modal
+        open={datePickerOpen}
+        date={date}
+        onConfirm={(date) => {
+          setDatePickerOpen(false);
+          setDate(date);
+          setValue('dueDateDisplay', format(date, 'd MMM yyyy h:mm a'));
+          setValue('dueDate', date);
+        }}
+        onCancel={() => {
+          setDatePickerOpen(false);
+        }}
+      />
       <Stack.Screen
         options={{
           title: 'Add Todo',
@@ -79,6 +102,16 @@ export default function TodoCreate() {
           multiline
           testID="body-input"
         />
+        <Pressable onPress={() => setDatePickerOpen(true)}>
+          <ControlledInput
+            name="dueDateDisplay"
+            label="Due Date"
+            control={control}
+            testID="input-due-date"
+            editable={false}
+            textAlwaysActive={true}
+          />
+        </Pressable>
         <Button
           label="Add Post"
           loading={isPending}
