@@ -1,5 +1,6 @@
 import { MotiView } from 'moti';
 import React, { useCallback } from 'react';
+import { type FieldValues, useController } from 'react-hook-form';
 import {
   I18nManager,
   Pressable,
@@ -9,6 +10,7 @@ import {
 import Svg, { Path } from 'react-native-svg';
 
 import colors from '@/ui/colors';
+import { type InputControllerType } from '@/ui/input';
 
 import { Text } from './text';
 
@@ -135,6 +137,42 @@ const CheckboxBase = ({
     </CheckboxRoot>
   );
 };
+
+export interface CheckboxProps extends Omit<PressableProps, 'onPress'> {
+  className?: string;
+  accessibilityLabel: string;
+  label: string;
+}
+
+interface ControlledCheckboxProps<T extends FieldValues>
+  extends CheckboxProps,
+    InputControllerType<T> {}
+
+// only used with react-hook-form
+export function ControlledCheckbox<T extends FieldValues>(
+  props: ControlledCheckboxProps<T>,
+) {
+  const { name, control, testID, rules, ...inputProps } = props;
+
+  const { field, fieldState } = useController({ control, name, rules });
+  return (
+    <>
+      <CheckboxBase
+        checked={field.value as boolean}
+        onChange={field.onChange}
+        {...inputProps}
+      />
+      {fieldState.error?.message && (
+        <Text
+          testID={testID ? `${testID}-error` : undefined}
+          className="text-sm text-danger-400 dark:text-danger-600"
+        >
+          {fieldState.error?.message}
+        </Text>
+      )}
+    </>
+  );
+}
 
 export const Checkbox = Object.assign(CheckboxBase, {
   Icon: CheckboxIcon,
