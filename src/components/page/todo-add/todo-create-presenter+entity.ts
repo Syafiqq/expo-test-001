@@ -12,7 +12,7 @@ export function toDomain(data: TodoCreatePresenter): TodoEntity {
     completed: false,
     createdAt: now,
     updatedAt: now,
-    dueDate: new Date(Date.now() + Math.floor(Math.random() * 10000000000)),
+    dueDate: data.dueDate,
     priority: 'low',
   };
 }
