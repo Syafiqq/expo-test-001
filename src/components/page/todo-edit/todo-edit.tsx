@@ -9,9 +9,13 @@ import { useForm } from 'react-hook-form';
 import { Pressable } from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import { showMessage } from 'react-native-flash-message';
-import { z } from 'zod';
 
 import { useTodoRepository } from '@/api/repositoiry/todo';
+import {
+  type FormType,
+  priorities,
+  schema,
+} from '@/components/page/todo-add/todo-create-schema';
 import { type TodoEntity } from '@/core/entity/todo-entity.types';
 import { nullableToNull, nullableToUndefined } from '@/core/type-utils';
 import {
@@ -19,27 +23,9 @@ import {
   ControlledCheckbox,
   ControlledInput,
   ControlledSelect,
-  type OptionType,
   showErrorMessage,
   View,
 } from '@/ui';
-
-const priorities: OptionType[] = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-];
-
-const schema = z.object({
-  title: z.string().min(1),
-  description: z.string().min(1),
-  dueDate: z.coerce.date(),
-  dueDateDisplay: z.string(),
-  completed: z.boolean().default(false),
-  priority: z.enum(['low', 'medium', 'high']).default('low'),
-});
-
-type FormType = z.infer<typeof schema>;
 
 type Props = {
   id: string;
