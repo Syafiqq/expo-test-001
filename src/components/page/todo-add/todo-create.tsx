@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { Stack } from 'expo-router';
+import { Image } from 'expo-image';
+import { router, Stack } from 'expo-router';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Pressable } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import { showMessage } from 'react-native-flash-message';
 
@@ -25,7 +26,7 @@ import {
   ControlledSelect,
   showErrorMessage,
   View,
-} from '@/ui';
+} from '@/ui'; // eslint-disable-next-line max-lines-per-function
 
 // eslint-disable-next-line max-lines-per-function
 export default function TodoCreate() {
@@ -90,54 +91,65 @@ export default function TodoCreate() {
           title: 'Add Todo',
         }}
       />
-      <View className="flex-1 p-4 ">
-        <ControlledInput
-          name="title"
-          label="Title"
-          control={control}
-          testID="title"
-        />
-        <ControlledInput
-          name="description"
-          label="Content"
-          control={control}
-          multiline
-          testID="body-input"
-        />
-        <Pressable onPress={() => setDatePickerOpen(true)}>
+      <ScrollView className="flex-1">
+        <View className="flex-1 p-4 ">
           <ControlledInput
-            name="dueDateDisplay"
-            label="Due Date"
+            name="title"
+            label="Title"
             control={control}
-            testID="input-due-date"
-            editable={false}
-            textAlwaysActive={true}
+            testID="title"
           />
-        </Pressable>
-        <View className="mb-2 mt-4">
-          <ControlledSelect
-            name="priority"
-            label="Priority"
+          <ControlledInput
+            name="description"
+            label="Content"
             control={control}
-            options={priorities}
-            testID="input-select"
+            multiline
+            testID="body-input"
+          />
+          <Pressable onPress={() => setDatePickerOpen(true)}>
+            <ControlledInput
+              name="dueDateDisplay"
+              label="Due Date"
+              control={control}
+              testID="input-due-date"
+              editable={false}
+              textAlwaysActive={true}
+            />
+          </Pressable>
+          <View className="mb-2 mt-4">
+            <ControlledSelect
+              name="priority"
+              label="Priority"
+              control={control}
+              options={priorities}
+              testID="input-select"
+            />
+          </View>
+          <Pressable onPress={() => router.push('../(aux)/take-photos')}>
+            <View className="aspect-[4/3] w-full items-center justify-center rounded border bg-gray-200">
+              <Image
+                source={{ uri: 'https://via.placeholder.com/150' }}
+                className="h-1/2 w-1/2"
+                contentFit="contain"
+              />
+            </View>
+          </Pressable>
+          <ControlledCheckbox
+            className="mb-2 mt-4"
+            name="completed"
+            control={control}
+            accessibilityLabel="Mark as completed"
+            label="Mark as completed"
+            testID="input-completed"
+          />
+          <Button
+            label="Add Post"
+            loading={isPending}
+            onPress={handleSubmit(onSubmit)}
+            testID="add-post-button"
           />
         </View>
-        <ControlledCheckbox
-          className="my-2"
-          name="completed"
-          control={control}
-          accessibilityLabel="Mark as completed"
-          label="Mark as completed"
-          testID="input-completed"
-        />
-        <Button
-          label="Add Post"
-          loading={isPending}
-          onPress={handleSubmit(onSubmit)}
-          testID="add-post-button"
-        />
-      </View>
+      </ScrollView>
     </>
   );
 }
