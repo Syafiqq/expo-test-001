@@ -18,9 +18,17 @@ import {
   Button,
   ControlledCheckbox,
   ControlledInput,
+  ControlledSelect,
+  type OptionType,
   showErrorMessage,
   View,
 } from '@/ui';
+
+const priorities: OptionType[] = [
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' },
+];
 
 const schema = z.object({
   title: z.string().min(10),
@@ -28,6 +36,7 @@ const schema = z.object({
   dueDate: z.coerce.date(),
   dueDateDisplay: z.string(),
   completed: z.boolean().default(false),
+  priority: z.enum(['low', 'medium', 'high']).default('low'),
 });
 
 type FormType = z.infer<typeof schema>;
@@ -119,6 +128,15 @@ export default function TodoCreate() {
             textAlwaysActive={true}
           />
         </Pressable>
+        <View className="mb-2 mt-4">
+          <ControlledSelect
+            name="priority"
+            label="Priority"
+            control={control}
+            options={priorities}
+            testID="input-select"
+          />
+        </View>
         <ControlledCheckbox
           className="my-2"
           name="completed"

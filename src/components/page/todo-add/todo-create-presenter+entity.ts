@@ -13,6 +13,6 @@ export function toDomain(data: TodoCreatePresenter): TodoEntity {
     createdAt: now,
     updatedAt: now,
     dueDate: data.dueDate,
-    priority: 'low',
+    priority: data.priority,
   };
 }
