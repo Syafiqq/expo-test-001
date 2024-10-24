@@ -14,13 +14,20 @@ import { useTodoRepository } from '@/api/repositoiry/todo';
 import { type TodoCreatePresenter } from '@/components/page/todo-add/todo-create-presenter';
 import { toDomain } from '@/components/page/todo-add/todo-create-presenter+entity';
 import { type TodoEntity } from '@/core/entity/todo-entity.types';
-import { Button, ControlledInput, showErrorMessage, View } from '@/ui';
+import {
+  Button,
+  ControlledCheckbox,
+  ControlledInput,
+  showErrorMessage,
+  View,
+} from '@/ui';
 
 const schema = z.object({
   title: z.string().min(10),
   description: z.string().min(120),
   dueDate: z.coerce.date(),
   dueDateDisplay: z.string(),
+  completed: z.boolean().default(false),
 });
 
 type FormType = z.infer<typeof schema>;
@@ -112,6 +119,14 @@ export default function TodoCreate() {
             textAlwaysActive={true}
           />
         </Pressable>
+        <ControlledCheckbox
+          className="my-2"
+          name="completed"
+          control={control}
+          accessibilityLabel="Mark as completed"
+          label="Mark as completed"
+          testID="input-completed"
+        />
         <Button
           label="Add Post"
           loading={isPending}

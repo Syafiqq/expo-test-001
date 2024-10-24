@@ -9,7 +9,7 @@ export function toDomain(data: TodoCreatePresenter): TodoEntity {
     id: uuid.v4(),
     title: data.title,
     description: data.description,
-    completed: false,
+    completed: data.completed,
     createdAt: now,
     updatedAt: now,
     dueDate: data.dueDate,
