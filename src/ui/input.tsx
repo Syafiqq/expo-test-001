@@ -39,17 +39,24 @@ const inputTv = tv({
         input: 'bg-neutral-200',
       },
     },
+    textAlwaysActive: {
+      true: {
+        input: 'text-black dark:text-white',
+      },
+    },
   },
   defaultVariants: {
     focused: false,
     error: false,
     disabled: false,
+    textAlwaysActive: false,
   },
 });
 
 export interface NInputProps extends TextInputProps {
   label?: string;
   disabled?: boolean;
+  textAlwaysActive?: boolean;
   error?: string;
 }
 
@@ -83,6 +90,7 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
         error: Boolean(error),
         focused: isFocussed,
         disabled: Boolean(props.disabled),
+        textAlwaysActive: props.textAlwaysActive,
       }),
     [error, isFocussed, props.disabled],
   );
