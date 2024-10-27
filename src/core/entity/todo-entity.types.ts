@@ -7,4 +7,5 @@ export type TodoEntity = {
   updatedAt: Date;
   dueDate: Date | null;
   priority: 'low' | 'medium' | 'high' | null;
+  picture: string | null;
 };
