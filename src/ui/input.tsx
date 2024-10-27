@@ -92,7 +92,7 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
         disabled: Boolean(props.disabled),
         textAlwaysActive: props.textAlwaysActive,
       }),
-    [error, isFocussed, props.disabled],
+    [props.textAlwaysActive, error, isFocussed, props.disabled],
   );
 
   return (
