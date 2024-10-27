@@ -4,4 +4,5 @@ export type TodoCreatePresenter = {
   dueDate: Date;
   completed: boolean;
   priority: 'low' | 'medium' | 'high';
+  picture: string;
 };

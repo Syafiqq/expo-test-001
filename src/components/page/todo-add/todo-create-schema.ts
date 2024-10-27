@@ -15,6 +15,7 @@ export const schema = z.object({
   dueDateDisplay: z.string(),
   completed: z.boolean().default(false),
   priority: z.enum(['low', 'medium', 'high']).default('low'),
+  picture: z.string(),
 });
 
 export type FormType = z.infer<typeof schema>;

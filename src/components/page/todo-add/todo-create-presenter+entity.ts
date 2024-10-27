@@ -14,5 +14,6 @@ export function toDomain(data: TodoCreatePresenter): TodoEntity {
     updatedAt: now,
     dueDate: data.dueDate,
     priority: data.priority,
+    picture: data.picture,
   };
 }
