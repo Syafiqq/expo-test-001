@@ -14,12 +14,13 @@ export class TodoLocalDatasourceImpl implements ToDoLocalDataSource {
     this.db = db;
   }
 
-  private convertToDate(item: TodoEntity): TodoEntity {
+  private sanitiseDataType(item: TodoEntity): TodoEntity {
     return {
       ...item,
       createdAt: new Date(item.createdAt),
       updatedAt: new Date(item.updatedAt),
       dueDate: item.dueDate ? new Date(item.dueDate) : null,
+      completed: !!item.completed,
     };
   }
 
@@ -27,12 +28,12 @@ export class TodoLocalDatasourceImpl implements ToDoLocalDataSource {
     const results = await this.db.getAllAsync<TodoEntity>(
       `SELECT * FROM ${DbTableName.TodoItem}`,
     );
-    return results.map(this.convertToDate);
+    return results.map(this.sanitiseDataType);
   }
 
   async add(item: TodoEntity): Promise<TodoEntity> {
     await this.db.runAsync(
-      `INSERT INTO ${DbTableName.TodoItem} (id, title, description, completed, createdAt, updatedAt, dueDate, priority) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO ${DbTableName.TodoItem} (id, title, description, completed, createdAt, updatedAt, dueDate, priority, picture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       item.id,
       item.title,
       nullableToNull(item.description),
@@ -41,6 +42,7 @@ export class TodoLocalDatasourceImpl implements ToDoLocalDataSource {
       item.updatedAt.toISOString(),
       nullableToNull(item.dueDate?.toISOString()),
       nullableToNull(item.priority),
+      item.picture
     );
     return item;
   }
@@ -53,18 +55,19 @@ export class TodoLocalDatasourceImpl implements ToDoLocalDataSource {
     if (!result) {
       throw dataNotFoundError;
     }
-    return this.convertToDate(result);
+    return this.sanitiseDataType(result);
   }
 
   async edit(item: TodoEntity): Promise<TodoEntity> {
     await this.db.runAsync(
-      `UPDATE ${DbTableName.TodoItem} SET title = ?, description = ?, completed = ?, updatedAt = ?, dueDate = ?, priority = ? WHERE id = ?`,
+      `UPDATE ${DbTableName.TodoItem} SET title = ?, description = ?, completed = ?, updatedAt = ?, dueDate = ?, priority = ?, picture = ? WHERE id = ?`,
       item.title,
       nullableToNull(item.description),
       item.completed,
       item.updatedAt.toISOString(),
       nullableToNull(item.dueDate?.toISOString()),
       nullableToNull(item.priority),
+      item.picture,
       item.id,
     );
     return item;
