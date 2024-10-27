@@ -27,6 +27,7 @@ function generateRandomTodoItem(): TodoEntity {
         ? new Date(now.getTime() + Math.floor(Math.random() * 1000000000))
         : null,
     priority: getRandomPriority(),
+    picture: null,
   };
 }
 
