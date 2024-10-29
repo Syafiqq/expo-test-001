@@ -39,7 +39,7 @@ export class TodoCatalogueViewModel {
       });
 
       this.repository
-        .getAllFromLocal()
+        .getAllFromLocal(undefined)
         .then((todos) => {
           if (signal.aborted) {
             return;

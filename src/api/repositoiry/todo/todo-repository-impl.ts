@@ -2,6 +2,7 @@ import * as FileSystem from 'expo-file-system';
 
 import { type ToDoLocalDataSource } from '@/api/local/todo/todo-local-datasource.types';
 import { type TodoEntity } from '@/core/entity/todo-entity.types';
+import type { TodoSearchEntity } from '@/core/entity/todo-search-entity';
 
 import { type ToDoRepository } from './todo-repository.types';
 
@@ -12,8 +13,15 @@ export class TodoRepositoryImpl implements ToDoRepository {
     this.local = local;
   }
 
-  async getAllFromLocal(): Promise<TodoEntity[]> {
-    let result = await this.local.getAll();
+  async getAllFromLocal(
+    query: TodoSearchEntity | undefined,
+  ): Promise<TodoEntity[]> {
+    let result: TodoEntity[];
+    if (query) {
+      result = await this.local.getAllWithQuery(query);
+    } else {
+      result = await this.local.getAll();
+    }
     return result.map((item) => this.provideLocalPicturePath(item));
   }
 
