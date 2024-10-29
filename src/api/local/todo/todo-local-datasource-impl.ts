@@ -42,7 +42,7 @@ export class TodoLocalDatasourceImpl implements ToDoLocalDataSource {
       item.updatedAt.toISOString(),
       nullableToNull(item.dueDate?.toISOString()),
       nullableToNull(item.priority),
-      item.picture
+      item.picture,
     );
     return item;
   }

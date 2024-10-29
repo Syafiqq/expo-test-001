@@ -85,7 +85,7 @@ export const ImageView = React.forwardRef<View, ImageViewProps>(
               <Image
                 source={{ uri: value }}
                 alt="Image"
-                className="h-full w-full object-cover"
+                className="size-full object-cover"
                 contentFit={'contain'}
               />
             ) : (
