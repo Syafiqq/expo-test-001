@@ -12,9 +12,9 @@ CREATE TABLE IF NOT EXISTS ${DbTableName.TodoItem} (
   title TEXT NOT NULL,
   description TEXT,
   completed BOOLEAN NOT NULL,
-  createdAt DATETIME NOT NULL,
-  updatedAt DATETIME NOT NULL,
-  dueDate DATETIME,
+  createdAt INTEGER NOT NULL,
+  updatedAt INTEGER NOT NULL,
+  dueDate INTEGER,
   priority TEXT CHECK(priority IN ('low', 'medium', 'high'))
 );
   `);

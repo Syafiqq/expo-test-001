@@ -41,9 +41,9 @@ export async function seed(db: SQLiteDatabase) {
       item.title,
       nullableToNull(item.description),
       item.completed,
-      item.createdAt.toISOString(),
-      item.updatedAt.toISOString(),
-      nullableToNull(item.dueDate?.toISOString()),
+      item.createdAt.getTime(),
+      item.updatedAt.getTime(),
+      nullableToNull(item.dueDate?.getTime()),
       nullableToNull(item.priority),
     );
   }
