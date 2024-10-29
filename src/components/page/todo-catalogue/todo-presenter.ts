@@ -3,4 +3,6 @@ export type TodoPresenter = {
   title: string;
   description: string;
   dueDate: string;
+  completed: boolean;
+  priority: string | null;
 };
