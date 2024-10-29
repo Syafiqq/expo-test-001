@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import React, { useEffect } from 'react';
 import { Pressable, View } from 'react-native';
@@ -6,6 +6,7 @@ import { Pressable, View } from 'react-native';
 import { useTodoRepository } from '@/api/repositoiry/todo';
 import { ListPage } from '@/components/page/todo-catalogue/components/todo-list-layout';
 import { TodoPageLoading } from '@/components/page/todo-catalogue/components/todo-page-loading';
+import TodoSearch from '@/components/page/todo-catalogue/components/todo-search';
 import { toPresenter } from '@/components/page/todo-catalogue/todo-presenter+entity';
 import {
   hideFilterAndOrder,
@@ -21,12 +22,17 @@ import {
 } from '@/ui';
 import { Sliders } from '@/ui/icons/sliders';
 
+// eslint-disable-next-line max-lines-per-function
 export function TodoCatalogue() {
   const repository = useTodoRepository();
   const isFilterActive = useAppSelector(
     (state) => state.todoCatalogueNavigation.isFilterAndOrderShown,
   );
+  const searchQuery = useAppSelector(
+    (state) => state.todoCatalogueSearch.query,
+  );
   const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
   const modal = useModal();
 
   const {
@@ -36,7 +42,7 @@ export function TodoCatalogue() {
     data: todos,
   } = useQuery({
     queryKey: ['todos'],
-    queryFn: () => repository.getAllFromLocal(undefined),
+    queryFn: () => repository.getAllFromLocal(searchQuery),
     select: (data) => data.map(toPresenter),
     enabled: !!repository,
   });
@@ -68,7 +74,14 @@ export function TodoCatalogue() {
     <>
       <FocusAwareStatusBar />
       <Modal ref={modal.ref} snapPoints={['95%']}>
-        <></>
+        <TodoSearch
+          savedQuery={searchQuery}
+          useBottomSheet={true}
+          onSearchCommitted={() => {
+            modal.dismiss();
+            queryClient.invalidateQueries({ queryKey: ['todos'] });
+          }}
+        />
       </Modal>
       <Stack.Screen
         options={{
