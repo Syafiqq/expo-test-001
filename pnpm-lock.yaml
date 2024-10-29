@@ -86,6 +86,9 @@ importers:
       i18next:
         specifier: ^23.14.0
         version: 23.14.0
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       lodash.memoize:
         specifier: ^4.1.2
         version: 4.1.2
@@ -116,6 +119,9 @@ importers:
       react-native-date-picker:
         specifier: ^5.0.7
         version: 5.0.7(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
+      react-native-draglist:
+        specifier: ^3.6.2
+        version: 3.6.2(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
       react-native-flash-message:
         specifier: ^0.4.2
         version: 0.4.2(prop-types@15.8.1)(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
@@ -6273,6 +6279,12 @@ packages:
     peerDependencies:
       react: '>= 17.0.1'
       react-native: '>= 0.64.3'
+
+  react-native-draglist@3.6.2:
+    resolution: {integrity: sha512-QGgA5ejlJkd9B5meDxvkhxiFSyDZ6K341U/xcx4KhkoglCEqRTPmw6uZ9bQjpBqlty/lksVpWKnetCOgFnTUYA==}
+    peerDependencies:
+      react: '>=17.0.1'
+      react-native: '>=0.64.0'
 
   react-native-flash-message@0.4.2:
     resolution: {integrity: sha512-YvdXRW9AGMTI99S3DJZhLO0mbk/ehKv/UQf4/Df+3dtGi8DlkidRbyqCQZk1WMtZ7rN85PMTGr/xEI9CF9z0YA==}
@@ -15495,6 +15507,11 @@ snapshots:
       - supports-color
 
   react-native-date-picker@5.0.7(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0):
+    dependencies:
+      react: 18.2.0
+      react-native: 0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.2.79)(react@18.2.0)
+
+  react-native-draglist@3.6.2(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0):
     dependencies:
       react: 18.2.0
       react-native: 0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.2.79)(react@18.2.0)
