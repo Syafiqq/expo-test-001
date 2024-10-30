@@ -139,6 +139,9 @@ export function TodoCatalogue() {
   const searchQuery = useAppSelector(
     (state) => state.todoCatalogueSearch.query,
   );
+  const searchTextQuery = useAppSelector(
+    (state) => state.todoCatalogueSearch.search,
+  );
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const modal = useModal();
@@ -150,10 +153,14 @@ export function TodoCatalogue() {
     data: todos,
   } = useQuery({
     queryKey: ['todos'],
-    queryFn: () => repository.getAllFromLocal(searchQuery, undefined),
+    queryFn: () => repository.getAllFromLocal(searchQuery, searchTextQuery),
     select: (data) => data.map(toPresenter),
     enabled: !!repository,
   });
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['todos'] });
+  }, [queryClient, searchTextQuery]);
 
   useEffect(() => {
     if (error) {
