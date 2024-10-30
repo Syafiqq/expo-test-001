@@ -4,7 +4,10 @@ import type { TodoSearchEntity } from '@/core/entity/todo-search-entity';
 export interface ToDoLocalDataSource {
   getAll(): Promise<TodoEntity[]>;
 
-  getAllWithQuery(query: TodoSearchEntity): Promise<TodoEntity[]>;
+  getAllWithQuery(
+    query: TodoSearchEntity | undefined,
+    search: string | undefined,
+  ): Promise<TodoEntity[]>;
 
   add(item: TodoEntity): Promise<TodoEntity>;
 

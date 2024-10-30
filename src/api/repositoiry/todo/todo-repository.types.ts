@@ -2,7 +2,10 @@ import { type TodoEntity } from '@/core/entity/todo-entity.types';
 import { type TodoSearchEntity } from '@/core/entity/todo-search-entity';
 
 export interface ToDoRepository {
-  getAllFromLocal(query: TodoSearchEntity | undefined): Promise<TodoEntity[]>;
+  getAllFromLocal(
+    query: TodoSearchEntity | undefined,
+    search: string | undefined
+  ): Promise<TodoEntity[]>;
 
   addToLocal(item: TodoEntity): Promise<TodoEntity>;
 

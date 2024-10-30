@@ -32,9 +32,15 @@ export class TodoLocalDatasourceImpl implements ToDoLocalDataSource {
     return results.map(this.sanitiseDataType);
   }
 
-  async getAllWithQuery(query: TodoSearchEntity): Promise<TodoEntity[]> {
-    const filter = mergeFilter(getFilter(query));
-    const order = mergeOrder(getOrderBy(query));
+  async getAllWithQuery(
+    query: TodoSearchEntity | undefined,
+    search: string | undefined,
+  ): Promise<TodoEntity[]> {
+    const filter = mergeFilter(
+      search ? getSearch(search) : undefined,
+      query ? getFilter(query) : undefined,
+    );
+    const order = mergeOrder(query ? getOrderBy(query) : undefined);
     const results = await this.db.getAllAsync<TodoEntity>(
       `SELECT * FROM ${DbTableName.TodoItem} ${filter} ${order}`,
     );
@@ -91,6 +97,19 @@ export class TodoLocalDatasourceImpl implements ToDoLocalDataSource {
   }
 }
 
+const getSearch = function (query: string): string | undefined {
+  if (query.length <= 0) {
+    return undefined;
+  }
+
+  let queryStrings: string[] = [];
+
+  queryStrings.push(`title LIKE '%${query}%'`);
+  queryStrings.push(`description LIKE '%${query}%'`);
+
+  return queryStrings.join(' OR ');
+};
+
 const getFilter = function (query: TodoSearchEntity): string | undefined {
   let queryStrings: string[] = [];
 
@@ -129,7 +148,9 @@ const getFilter = function (query: TodoSearchEntity): string | undefined {
 };
 
 const mergeFilter = (...filters: (string | undefined)[]): string => {
-  let result = compactMap(filters, (filter) => filter).join(' AND ');
+  let result = compactMap(filters, (filter) => filter)
+    .map((filter) => `(${filter})`)
+    .join(' AND ');
   if (result.length <= 0) {
     return '';
   }

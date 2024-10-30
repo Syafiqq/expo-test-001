@@ -15,10 +15,11 @@ export class TodoRepositoryImpl implements ToDoRepository {
 
   async getAllFromLocal(
     query: TodoSearchEntity | undefined,
+    search: string | undefined
   ): Promise<TodoEntity[]> {
     let result: TodoEntity[];
-    if (query) {
-      result = await this.local.getAllWithQuery(query);
+    if (query || search) {
+      result = await this.local.getAllWithQuery(query, search);
     } else {
       result = await this.local.getAll();
     }
