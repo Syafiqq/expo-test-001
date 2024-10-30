@@ -1,12 +1,13 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
-import React, { useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { useTodoRepository } from '@/api/repositoiry/todo';
 import { ListPage } from '@/components/page/todo-catalogue/components/todo-list-layout';
 import { TodoPageLoading } from '@/components/page/todo-catalogue/components/todo-page-loading';
 import TodoSearch from '@/components/page/todo-catalogue/components/todo-search';
+import { type TodoPresenter } from '@/components/page/todo-catalogue/todo-presenter';
 import { toPresenter } from '@/components/page/todo-catalogue/todo-presenter+entity';
 import {
   hideFilterAndOrder,
@@ -21,6 +22,10 @@ import {
   useModal,
 } from '@/ui';
 import { Sliders } from '@/ui/icons/sliders';
+
+const ListPageMemo = memo(({ todos }: { todos: TodoPresenter[] }) => (
+  <ListPage data={todos ?? []} />
+));
 
 // eslint-disable-next-line max-lines-per-function
 export function TodoCatalogue() {
@@ -99,7 +104,7 @@ export function TodoCatalogue() {
             ) : null,
         }}
       />
-      <ListPage data={todos ?? []}></ListPage>
+      <ListPageMemo todos={todos ?? []} />
     </>
   );
 }
