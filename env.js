@@ -37,8 +37,8 @@ require('dotenv').config({
 const BUNDLE_ID = 'com.github.syafiqq.expotest003'; // ios bundle id
 const PACKAGE = 'com.github.syafiqq.expotest003'; // android package name
 const NAME = 'ExpoTest003'; // app name
-const EXPO_ACCOUNT_OWNER = 'expo-owner'; // expo account owner
-const EAS_PROJECT_ID = 'c3e1075b-6fe7-4686-aa49-35b46a229044'; // eas project id
+const EXPO_ACCOUNT_OWNER = 'syafiqq1'; // expo account owner
+const EAS_PROJECT_ID = 'cf9a54fd-a6e3-4284-aec0-3c7a7332817e'; // eas project id
 const SCHEME = 'expo-test-003'; // app scheme
 
 /**
