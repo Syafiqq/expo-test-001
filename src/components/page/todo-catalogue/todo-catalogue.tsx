@@ -45,17 +45,8 @@ const DebouncedSearchBar = ({ onChangeText }: DebouncedSearchBarProps) => {
   const [textSearch, setTextSearch] = useState('');
 
   useEffect(() => {
-    const subscription = debouncedSearchBarSubject
-      .pipe(debounceTime(1000))
-      .subscribe((text) => {
-        onChangeText?.(text);
-      });
-    return () => subscription.unsubscribe();
-  }, [onChangeText]);
-
-  useEffect(() => {
-    debouncedSearchBarSubject.next(textSearch);
-  }, [textSearch]);
+    onChangeText?.(textSearch);
+  }, [onChangeText, textSearch]);
 
   return (
     <Searchbar
@@ -81,8 +72,17 @@ const TodoHeader = (props: TodoHeaderProps) => {
 
   const dispatch = useAppDispatch();
 
+  useEffect(() => {
+    const subscription = debouncedSearchBarSubject
+      .pipe(debounceTime(1000))
+      .subscribe((text) => {
+        dispatch(updateSearch(text));
+      });
+    return () => subscription.unsubscribe();
+  }, [dispatch]);
+
   const onChangeText = (text: string) => {
-    dispatch(updateSearch(text));
+    debouncedSearchBarSubject.next(text);
   };
 
   return isSearchShown ? (
