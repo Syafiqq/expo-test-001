@@ -55,7 +55,9 @@ export default function TodoCreate() {
       onSettled: (data) => {
         if (data) {
           reset();
-          queryClient.invalidateQueries({ queryKey: ['todos'] });
+          queryClient.cancelQueries({ queryKey: ['todos']});
+          queryClient.resetQueries({ queryKey: ['todos']});
+          queryClient.invalidateQueries({ queryKey: ['todos']});
         }
       },
     });

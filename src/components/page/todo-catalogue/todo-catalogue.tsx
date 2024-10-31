@@ -187,7 +187,9 @@ export function TodoCatalogue() {
   });
 
   useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ['todos'] });
+    queryClient.cancelQueries({ queryKey: ['todos']});
+    queryClient.resetQueries({ queryKey: ['todos']});
+    queryClient.invalidateQueries({ queryKey: ['todos']});
   }, [queryClient, searchTextQuery]);
 
   useEffect(() => {
@@ -222,7 +224,9 @@ export function TodoCatalogue() {
           useBottomSheet={true}
           onSearchCommitted={() => {
             modal.dismiss();
-            queryClient.invalidateQueries({ queryKey: ['todos'] });
+            queryClient.cancelQueries({ queryKey: ['todos']});
+            queryClient.resetQueries({ queryKey: ['todos']});
+            queryClient.invalidateQueries({ queryKey: ['todos']});
           }}
         />
       </Modal>
