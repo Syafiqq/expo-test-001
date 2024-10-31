@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
 import { type InfiniteData } from '@tanstack/react-query';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import { useTodoRepository } from '@/api/repositoiry/todo';
@@ -29,13 +29,15 @@ export function ListPage({
     [repo],
   );
 
+  const keyExtractor = useCallback((item: TodoPresenter, i: number) => `${i}-${item.id}`, []);
+
   return (
     <View className="flex-1 ">
       <FocusAwareStatusBar />
       <FlashList
         data={data?.pages.flat() ?? []}
         renderItem={renderItem}
-        keyExtractor={(item, _) => `item-${item.id}`}
+        keyExtractor={keyExtractor}
         ListEmptyComponent={<EmptyList isLoading={false} />}
         estimatedItemSize={300}
         contentContainerStyle={{ paddingBottom: 80, paddingTop: 32 }}
