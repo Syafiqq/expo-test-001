@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { type InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { router, Stack, useFocusEffect } from 'expo-router';
 import * as React from 'react';
@@ -15,6 +15,8 @@ import {
   priorities,
   schema,
 } from '@/components/page/todo-add/todo-create-schema';
+import { type TodoPresenter } from '@/components/page/todo-catalogue/todo-presenter';
+import { toPresenter } from '@/components/page/todo-catalogue/todo-presenter+entity';
 import { type TodoEntity } from '@/core/entity/todo-entity.types';
 import { acknowledgePhoto } from '@/core/state/take-photo-slice';
 import { useAppDispatch, useAppSelector } from '@/core/state/use-redux';
@@ -90,13 +92,15 @@ export default function TodoEdit({ id }: Props) {
         if (data) {
           queryClient.setQueryData(['todo', id], data);
 
-          queryClient.setQueryData(['todos'], function (old: TodoEntity[]) {
-            return old.map((item) => {
-              if (item.id === data.id) {
-                return data;
-              }
-              return item;
-            });
+          queryClient.setQueryData(['todos'], (oldData: InfiniteData<TodoPresenter[]>) => {
+            if (!oldData) return oldData;
+
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page) =>
+                page.map((item) => (item.id === updatedTodo.id ? toPresenter(data) : item))
+              ),
+            };
           });
         }
       },
