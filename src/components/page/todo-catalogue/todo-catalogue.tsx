@@ -1,6 +1,10 @@
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 import { type NativeStackHeaderProps } from '@react-navigation/native-stack';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  type InfiniteData,
+  useInfiniteQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import React, { memo, useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -8,7 +12,10 @@ import { Searchbar } from 'react-native-paper';
 import { debounceTime, Subject } from 'rxjs';
 
 import { useTodoRepository } from '@/api/repositoiry/todo';
-import { ListPage } from '@/components/page/todo-catalogue/components/todo-list-layout';
+import {
+  ListPage,
+  type ListPageProps,
+} from '@/components/page/todo-catalogue/components/todo-list-layout';
 import { TodoPageLoading } from '@/components/page/todo-catalogue/components/todo-page-loading';
 import TodoSearch from '@/components/page/todo-catalogue/components/todo-search';
 import { type TodoPresenter } from '@/components/page/todo-catalogue/todo-presenter';
@@ -31,9 +38,9 @@ import {
 import { FaMagnifyingGlassSolid } from '@/ui/icons/fa-magnifying-glass-solid';
 import { Sliders } from '@/ui/icons/sliders';
 
-const ListPageMemo = memo(({ todos }: { todos: TodoPresenter[] }) => (
-  <ListPage data={todos ?? []} />
-));
+const pageLimit = 10;
+
+const ListPageMemo = memo((props: ListPageProps) => <ListPage {...props} />);
 
 // MARK: - Search Bar
 
@@ -148,14 +155,35 @@ export function TodoCatalogue() {
 
   const {
     isPending,
-    isFetching,
+    data,
     error,
-    data: todos,
-  } = useQuery({
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+  } = useInfiniteQuery<
+    TodoPresenter[],
+    Error,
+    InfiniteData<TodoPresenter[]>,
+    string[],
+    { afterId: string | undefined; limit: number }
+  >({
     queryKey: ['todos'],
-    queryFn: () => repository.getAllFromLocal(searchQuery, searchTextQuery, undefined),
-    select: (data) => data.map(toPresenter),
+    queryFn: async ({ pageParam }) => {
+      const data = await repository.getAllFromLocal(
+        searchQuery,
+        searchTextQuery,
+        pageParam,
+      );
+      return data.map(toPresenter);
+    },
     enabled: !!repository,
+    getNextPageParam: (lastPage) => ({
+      afterId:
+        lastPage.length > 0 ? lastPage[lastPage.length - 1].id : undefined,
+      limit: pageLimit,
+    }),
+    initialPageParam: { afterId: undefined, limit: pageLimit },
   });
 
   useEffect(() => {
@@ -174,9 +202,9 @@ export function TodoCatalogue() {
     } else {
       dispatch(showFilterAndOrder());
     }
-  }, [isPending, isFetching]);
+  }, [isPending, isFetching, dispatch]);
 
-  if (isPending) {
+  if (isPending || !data) {
     return (
       <>
         <FocusAwareStatusBar />
@@ -205,7 +233,12 @@ export function TodoCatalogue() {
           ),
         }}
       />
-      <ListPageMemo todos={todos ?? []} />
+      <ListPageMemo
+        data={data}
+        fetchNextPage={fetchNextPage}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+      />
     </>
   );
 }
