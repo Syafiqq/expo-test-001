@@ -153,7 +153,7 @@ export function TodoCatalogue() {
     data: todos,
   } = useQuery({
     queryKey: ['todos'],
-    queryFn: () => repository.getAllFromLocal(searchQuery, searchTextQuery),
+    queryFn: () => repository.getAllFromLocal(searchQuery, searchTextQuery, undefined),
     select: (data) => data.map(toPresenter),
     enabled: !!repository,
   });

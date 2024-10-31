@@ -2,11 +2,17 @@ import { type SQLiteDatabase } from 'expo-sqlite';
 
 import { DbTableName } from '@/api/local/db-table-name';
 import { type TodoEntity } from '@/core/entity/todo-entity.types';
+import type { TodoPaginationEntity } from '@/core/entity/todo-pagination.types';
 import { type TodoSearchEntity } from '@/core/entity/todo-search-entity';
 import { dataNotFoundError } from '@/core/error-utils';
 import { compactMap, nullableToNull } from '@/core/type-utils';
 
 import { type ToDoLocalDataSource } from './todo-local-datasource.types';
+
+type SortableTodoPaginationEntity = {
+  createdAt: number;
+  limit: number;
+};
 
 export class TodoLocalDatasourceImpl implements ToDoLocalDataSource {
   private readonly db: SQLiteDatabase;
@@ -25,9 +31,16 @@ export class TodoLocalDatasourceImpl implements ToDoLocalDataSource {
     };
   }
 
-  async getAll(): Promise<TodoEntity[]> {
+  async getAll(
+    pagination: TodoPaginationEntity | undefined,
+  ): Promise<TodoEntity[]> {
+    const page = await this.getSortablePagination(pagination);
+
+    const filter = mergeFilter(page ? getPaginationFilter(page) : undefined);
+    const limit = pagination ? getPaginationLimit(pagination.limit ?? 1) : '';
+
     const results = await this.db.getAllAsync<TodoEntity>(
-      `SELECT * FROM ${DbTableName.TodoItem}`,
+      `SELECT * FROM ${DbTableName.TodoItem} ${filter} ${limit}`,
     );
     return results.map(this.sanitiseDataType);
   }
@@ -35,14 +48,20 @@ export class TodoLocalDatasourceImpl implements ToDoLocalDataSource {
   async getAllWithQuery(
     query: TodoSearchEntity | undefined,
     search: string | undefined,
+    pagination: TodoPaginationEntity | undefined,
   ): Promise<TodoEntity[]> {
+    const page = await this.getSortablePagination(pagination);
+
     const filter = mergeFilter(
       search ? getSearch(search) : undefined,
       query ? getFilter(query) : undefined,
+      page ? getPaginationFilter(page) : undefined,
     );
     const order = mergeOrder(query ? getOrderBy(query) : undefined);
+    const limit = pagination ? getPaginationLimit(pagination.limit ?? 1) : '';
+
     const results = await this.db.getAllAsync<TodoEntity>(
-      `SELECT * FROM ${DbTableName.TodoItem} ${filter} ${order}`,
+      `SELECT * FROM ${DbTableName.TodoItem} ${filter} ${order} ${limit}`,
     );
     return results.map(this.sanitiseDataType);
   }
@@ -94,6 +113,31 @@ export class TodoLocalDatasourceImpl implements ToDoLocalDataSource {
       `DELETE FROM ${DbTableName.TodoItem} WHERE id = ?`,
       id,
     );
+  }
+
+  async getSortablePagination(
+    pagination: TodoPaginationEntity | undefined,
+  ): Promise<SortableTodoPaginationEntity | undefined> {
+    let id = pagination?.afterId;
+    let limit = pagination?.limit;
+    if (!pagination || !id || !limit) {
+      return undefined;
+    }
+
+    let result = await this.db.getFirstAsync<{ createdAt: number | undefined }>(
+      `SELECT createdAt FROM ${DbTableName.TodoItem} WHERE id = ? LIMIT 1`,
+      id,
+    );
+
+    if (!result) {
+      return undefined;
+    }
+
+    if (!result.createdAt) {
+      return undefined;
+    }
+
+    return { createdAt: result.createdAt, limit };
   }
 }
 
@@ -147,6 +191,16 @@ const getFilter = function (query: TodoSearchEntity): string | undefined {
   return queryStrings.join(' AND ');
 };
 
+const getPaginationFilter = (
+  pagination: SortableTodoPaginationEntity,
+): string | undefined => {
+  let queryStrings: string[] = [];
+
+  queryStrings.push(`createdAt > ${pagination.createdAt}`);
+
+  return queryStrings.join(' AND ');
+};
+
 const mergeFilter = (...filters: (string | undefined)[]): string => {
   let result = compactMap(filters, (filter) => filter)
     .map((filter) => `(${filter})`)
@@ -195,4 +249,8 @@ const mergeOrder = (...orders: (string | undefined)[]): string => {
     return '';
   }
   return `ORDER BY ${result}`;
+};
+
+const getPaginationLimit = (limit: number): string => {
+  return `LIMIT ${limit}`;
 };
